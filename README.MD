@@ -1,0 +1,1 @@
+You'll need a .env and credentials.json file
