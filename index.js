@@ -9,7 +9,7 @@ String.prototype.capitalize = function() {
 }
 
 const auth = new google.auth.GoogleAuth({
-    keyFile: "./credentials.json",
+    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
     scopes: ['https://www.googleapis.com/auth/spreadsheets']
 })
 
