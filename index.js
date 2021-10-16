@@ -1,8 +1,12 @@
 require('dotenv').config()
-const {google} = require('googleapis');
 const express = require('express')
+const https = require('https')
+const fs = require('fs')
+const {google} = require('googleapis');
+
+
 const app = express()
-const port = 3000
+const port = process.env.PORT
 
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
@@ -18,7 +22,10 @@ const googleSheets = google.sheets({version: 'v4', auth});
 const client = auth.getClient();
 
 const getLinksFromSheets = async (branch) => {
-    const rows = await googleSheets.spreadsheets.values.get({auth, spreadsheetId: process.env.SPREADSHEET_ID, range: branch.capitalize()});
+    const rows = await googleSheets.spreadsheets.values.get({
+        auth, spreadsheetId: process.env.SPREADSHEET_ID,
+        range: branch.capitalize()
+    });
     return rows.data.values;
 }
 
@@ -29,7 +36,12 @@ app.get('/', async (req, res) => {
 })
 
 
-
-app.listen(port, () => {
-    console.log(`Link Page Forwarder is listening at http://localhost:${port}`)
-  })
+// serve the API with signed certificate on 443 (SSL/HTTPS) port
+const httpsServer = https.createServer({
+    key: fs.readFileSync(process.env.KEY_LOCATION),
+    cert: fs.readFileSync(process.env.CERT_LOCATION),
+  }, app);
+  
+httpsServer.listen(port, () => {
+    console.log('HTTPS Server running on port ' + port.toString());
+});
